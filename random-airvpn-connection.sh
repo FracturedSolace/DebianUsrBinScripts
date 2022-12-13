@@ -29,13 +29,9 @@ nopasswd_sudo_enabled () {
 	while read line; do
 		
 		if [[ ${line,,} =~ $regex ]]; then
-			# Bash regex doesn't allow us to create ignored capture groups, so we need to always check
-			#	the last regex group in the array
-			capture=${BASH_REMATCH[-1]}
-			echo $capture
-			# If the captured regex matches our script source,
+			# If the final captured regex region matches our script source,
 			#	that means this script can sudo as intended
-			if [[ ${capture} == ${current_script} ]]; then
+			if [[ ${BASH_REMATCH[-1]} == ${current_script} ]]; then
 				return 1
 			fi
 		fi
