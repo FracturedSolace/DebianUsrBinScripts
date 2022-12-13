@@ -28,8 +28,7 @@ nopasswd_sudo_enabled () {
 	# ALL	ALL=(root) 	NOPASSWD:{accept but ignore any add'l paramters} {script name}
 	while read line; do
 		
-		[[ ${line,,} =~ $regex ]]
-		if [[ ${#BASH_REMATCH[@]} > 0 ]]; then
+		if [[ ${line,,} =~ $regex ]]; then
 			# Bash regex doesn't allow us to create ignored capture groups, so we need to always check
 			#	the last regex group in the array
 			capture=${BASH_REMATCH[-1]}
@@ -40,6 +39,7 @@ nopasswd_sudo_enabled () {
 				return 1
 			fi
 		fi
+		
 	done < <(sudo cat /etc/sudoers)
 	
 	return 0
