@@ -23,6 +23,7 @@ verify_bashsource_integrity
 
 # Verify that this script can be sudoed by all users regardless of normal permissions
 #	(without password)
+
 nopasswd_sudo_enabled () {
 	regex="^all[[:space:]]+all[[:space:]]*=\(root\)[[:space:]]+(.*:)*nopasswd:(.*:)*[[:space:]]+(.*)"
 	# ALL	ALL=(root) 	NOPASSWD:{accept but ignore any add'l paramters} {script name}
@@ -55,8 +56,8 @@ add_nopasswd_sudoers_entry () {
 	fi
 }
 
-# If the sudo entry isn't set up, then add it
 nopasswd_sudo_enabled && add_nopasswd_sudoers_entry
 
+# Finally, initiate a simple openvpn connection
 echo "Connecting to random AirVPN Server [$(basename ${randomServer})]"
 /usr/sbin/openvpn ${randomServer} &> /dev/null
