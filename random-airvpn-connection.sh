@@ -10,6 +10,17 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
+# Mitigate any kind of code injection attempted by modifying $BASH_SOURCE against a known regex
+verify_bashsource_integrity () {
+	
+	# Matches {any number of parent directories}/{filename}[.sh]
+	regex="^\/([a-z0-9\-]+\/)*[a-z0-9\-]+(\.sh)?$"
+	
+	# If regex fails, then we simply cut the variable completely
+	[[ $current_script =~ $regex ]] || $current_script=''
+}
+verify_bashsource_integrity
+
 # Verify that this script can be sudoed by all users regardless of normal permissions
 #	(without password)
 nopasswd_sudo_enabled () {
