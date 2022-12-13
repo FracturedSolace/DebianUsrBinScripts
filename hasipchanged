@@ -1,0 +1,41 @@
+#!/bin/bash
+#------------
+# hasipchanged.sh
+#------------
+# This script checks currnt IP against last known region to ensure that the IP has actually changed after a VPN switch
+# Script only checks that country is different than expected, so 2 IPs in the same country will show as identical
+
+original_region="US, United States"
+
+# Check for command dependencies
+if ! command -v geoiplookup &> /dev/null
+then
+	echo "[$(tput setaf 1)ERROR$(tput setaf 7)] geoiplookup does not appear to be installed"
+	echo  " try pacman -Sy geoip"
+	exit 1
+fi
+
+if ! command -v dig &> /dev/null
+then
+	echo "[$(tput setaf 1)ERROR$(tput setaf 7)] dig does not appear to be installed"
+	echo   " try pacman -Sy geoip"
+	exit 1
+fi
+
+# Parse geoiplookup output to get the country the current IP originates from
+current_ip="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+new_region="$(geoiplookup ${current_ip})"
+[[ $new_region =~ GeoIP\ Country\ Edition:\ (.*) ]]
+new_region="${BASH_REMATCH[1]}"
+
+if [[ $new_region == $original_region ]]; then
+	echo "[$(tput setaf 1)FAIL$(tput setaf 7)] Current region did not change from $(tput setaf 3)${original_region}$(tput setaf 7)"
+	exit 1
+else
+	echo "[$(tput setaf 2)SUCCESS$(tput setaf 7)] Current region changed from $(tput setaf 3)${original_region}$(tput setaf 7) to $(tput setaf 3)${new_region}$(tput setaf 7)"
+	echo "[$(tput setaf 3)INFO$(tput setaf 7)] Current IP Address is $(tput smul)${current_ip}$(tput rmul)"
+	exit 0
+fi
+
+# This should never be reached, but exists as a safety against returning 0 on failure
+exit 1
