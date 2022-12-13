@@ -21,6 +21,24 @@ verify_bashsource_integrity () {
 }
 verify_bashsource_integrity
 
+# Ensure that file has correct read/write permissions to be executed as sudo without password
+#	(file should not be modifiable by anyone other than root to avoid escalation)
+verify_self_permissions () {
+	self_permissions=$(stat -c %a ${current_script})
+	[[ $self_permissions == 755 ]] && return 0 || return 1
+}
+self_permissions_invalid () {
+# Executed if a problem is found with the script's permissions
+	echo "[$(tput setaf 1)WARNING$(tput setaf 7)] Script permissions should be [$(tput setaf 3)755$(tput setaf 7)] actually [$(tput setaf 3)${self_permissions}$(tput setaf 7)]"
+	echo "...attempting to set permissions to [$(tput setaf 3)755$(tput setaf 7)]"
+	chmod 755 ${current_script} || (
+		echo [$(tput setaf 1)Failed$(tput setaf 7)] chown could not be set on $(tput setaf 3)$current_script$(tput setaf 7)
+		echo "...exiting ${current_script}"
+		exit 1
+	) && echo "...success"
+}
+verify_self_permissions || self_permissions_invalid
+
 # Verify that this script can be sudoed by all users regardless of normal permissions
 #	(without password)
 
@@ -59,5 +77,5 @@ add_nopasswd_sudoers_entry () {
 nopasswd_sudo_enabled && add_nopasswd_sudoers_entry
 
 # Finally, initiate a simple openvpn connection
-echo "Connecting to random AirVPN Server [$(basename ${randomServer})]"
+echo "Connecting to random AirVPN Server [$(tput setaf 3)$(basename ${randomServer})$(tput setaf 7)]"
 /usr/sbin/openvpn ${randomServer} &> /dev/null
