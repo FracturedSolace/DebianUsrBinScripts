@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/local/bin/send-text "System rebooted $(date)"
