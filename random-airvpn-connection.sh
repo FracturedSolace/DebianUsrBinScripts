@@ -78,4 +78,4 @@ nopasswd_sudo_enabled && add_nopasswd_sudoers_entry
 
 # Finally, initiate a simple openvpn connection
 echo "Connecting to random AirVPN Server [$(tput setaf 3)$(basename ${randomServer})$(tput setaf 7)]"
-/usr/sbin/openvpn ${randomServer}
+/usr/sbin/openvpn --script-security 2 --up /etc/openvpn/up.sh ${randomServer}
