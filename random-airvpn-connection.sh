@@ -10,6 +10,9 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
+# Enable job control
+set -m
+
 # Mitigate any kind of code injection attempted by modifying $BASH_SOURCE against a known regex
 verify_bashsource_integrity () {
 	
@@ -76,6 +79,27 @@ add_nopasswd_sudoers_entry () {
 
 nopasswd_sudo_enabled && add_nopasswd_sudoers_entry
 
-# Finally, initiate a simple openvpn connection
+# Finally, initiate OpenVPN and ensure that IP changes
 echo "Connecting to random AirVPN Server [$(tput setaf 3)$(basename ${randomServer})$(tput setaf 7)]"
-/usr/sbin/openvpn ${randomServer}
+
+# Start openvpn in the background and pull it to the foreground once IP change is complete
+/usr/sbin/openvpn --config ${randomServer} --writepid /etc/openvpn/pid.txt &
+
+# Check 10 times, 1 second apart for an IP change
+for tries in {1..10}; do
+	echo "Checking for IP change (${tries})..."
+	if hasipchanged &> /dev/null; then
+		break
+	fi
+	sleep 1
+done
+
+if hasipchanged; then
+	/etc/openvpn/ip-changed.sh $(whatismyip)
+else
+	echo "[$(tput setaf 1)ERROR$(tput setaf 7)] Could not change IP"
+	kill $(cat /etc/openvpn/pid.txt)
+	exit 1
+fi
+
+fg %-
