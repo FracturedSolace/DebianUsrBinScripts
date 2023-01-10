@@ -95,7 +95,7 @@ for tries in {1..10}; do
 done
 
 if hasipchanged; then
-	/etc/openvpn/ip-changed.sh $(whatismyip)
+	/usr/local/bin/rebind-transmission.sh $(whatismyip)
 else
 	echo "[$(tput setaf 1)ERROR$(tput setaf 7)] Could not change IP"
 	kill $(cat /etc/openvpn/pid.txt)
