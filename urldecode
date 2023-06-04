@@ -11,4 +11,4 @@ rawurldecode() {
   echo "${REPLY}"  #+or echo the result (EASIER)... or both... :p
 }
 
-rawurledecode $1
+rawurldecode $1
