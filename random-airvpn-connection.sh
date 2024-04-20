@@ -94,8 +94,12 @@ for tries in {1..10}; do
 	sleep 1
 done
 
+# If IP changed, then update transmission binding; otherwise throw an error and kill the VPN connection
 if hasipchanged; then
-	/etc/openvpn/ip-changed.sh $(whatismyip)
+	regex="inet ([[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3})"
+	[[ $(ip addr | grep tun0) =~ $regex ]]
+	vpn_interface_address=${BASH_REMATCH[1]}
+	/usr/local/bin/rebind-transmission.sh $vpn_interface_address
 else
 	echo "[$(tput setaf 1)ERROR$(tput setaf 7)] Could not change IP"
 	kill $(cat /etc/openvpn/pid.txt)

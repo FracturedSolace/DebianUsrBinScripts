@@ -22,8 +22,9 @@ then
 fi
 
 #Finally, go ahead and add the specified
-read -sp 'Transmission RPC Password: ' passwd
-transmission-remote localhost -n "fracturedsolace:$passwd" -a "${1}"
+# read -sp 'Transmission RPC Password: ' passwd
+# transmission-remote localhost -n "fracturedsolace:$passwd" -a "${1}"
+transmission-remote localhost -a "${1}"
 
 #Return exit code 0 if transmission-remote was successful
 if [[ $? == 0 ]]
